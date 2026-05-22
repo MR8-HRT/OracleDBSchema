@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Active Employees Base",
+    "code": "SELECT\n  papf.person_number,\n  ppnf.full_name\nFROM\n  per_all_people_f papf\n  INNER JOIN per_person_names_f ppnf ON papf.person_id = ppnf.person_id\nWHERE\n  TRUNC(SYSDATE) BETWEEN papf.effective_start_date AND papf.effective_end_date;"
+  },
+  {
+    "name": "Today's Date",
+    "code": "SELECT TRUNC(SYSDATE) FROM DUAL;"
+  }
+]
