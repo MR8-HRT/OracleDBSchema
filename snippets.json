@@ -185,18 +185,18 @@
   },
   {
     "name": "Fetch Cost Center (GL Default)",
-    "code": "-- Retrieve the default Cost Center mapped to an assignment\nSELECT\n  pac.assignment_id,\n  gcc.segment3 AS cost_center -- Adjust segment number based on your Chart of Accounts\nFROM\n  pay_cost_allocations_f pac\n  INNER JOIN gl_code_combinations gcc ON pac.cost_allocation_keyflex_id = gcc.code_combination_id\nWHERE\n  TRUNC(SYSDATE) BETWEEN pac.effective_start_date AND pac.effective_end_date;"
+    "code": "-- Retrieve the default Cost Center mapped to an assignment\nSELECT\n  pac.assignment_id,\n  gcc.segment3 AS cost_center -- Adjust segment number based on your Chart of Accounts\nFROM\n  pay_cost_allocations_f pac\n  INNER JOIN gl_code_combinations gcc ON pac.cost_allocation_keyflex_id = gcc.code_combination_id\nWHERE\n  TRUNC(SYSDATE) BETWEEN pac.effective_start_date AND pac.effective_end_date"
   },
   {
     "name": "Fetch Worker Type (Employee vs Contingent)",
-    "code": "-- Identify if a worker is an Employee (E), Contingent Worker (C), or Non-Worker (N)\nSELECT\n  person_id,\n  worker_type\nFROM\n  per_periods_of_service\nWHERE\n  -- Make sure to check the active period of service\n  actual_termination_date IS NULL;"
+    "code": "-- Identify if a worker is an Employee (E), Contingent Worker (C), or Non-Worker (N)\nSELECT\n  person_id,\n  worker_type\nFROM\n  per_periods_of_service\nWHERE\n  -- Make sure to check the active period of service\n  actual_termination_date IS NULL"
   },
   {
     "name": "Extract JSON Value (Oracle 12c+)",
-    "code": "-- Parse JSON data stored in a CLOB or VARCHAR2 column\nSELECT\n  -- Assuming 'custom_json_data' is a column containing {\"department\":\"Sales\", \"id\":123}\n  JSON_VALUE(custom_json_data, '$.department') AS extracted_dept\nFROM\n  some_custom_integration_table;"
+    "code": "-- Parse JSON data stored in a CLOB or VARCHAR2 column\nSELECT\n  -- Assuming 'custom_json_data' is a column containing {\"department\":\"Sales\", \"id\":123}\n  JSON_VALUE(custom_json_data, '$.department') AS extracted_dept\nFROM\n  some_custom_integration_table"
   },
   {
     "name": "Fetch Last Update User",
-    "code": "-- See who last updated the employee profile record\nSELECT\n  person_id,\n  last_updated_by,\n  last_update_date\nFROM\n  per_all_people_f\nWHERE\n  TRUNC(SYSDATE) BETWEEN effective_start_date AND effective_end_date;"
+    "code": "-- See who last updated the employee profile record\nSELECT\n  person_id,\n  last_updated_by,\n  last_update_date\nFROM\n  per_all_people_f\nWHERE\n  TRUNC(SYSDATE) BETWEEN effective_start_date AND effective_end_date"
   }
 ]
