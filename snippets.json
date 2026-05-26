@@ -201,4 +201,90 @@
   },
   {
     "name": "Round Dates (ROUND)",
-    "code": "-- Round a date to the nearest month or year (different from TRUNC)\nSELECT\n  SYSDATE,\
+    "code": "-- Round a date to the nearest month or year (different from TRUNC)\nSELECT\n  SYSDATE,\n  -- Rounds up to next month if past the 15th\n  ROUND(SYSDATE, 'MM') AS rounded_month,\n  -- Rounds up to next year if past June 30th\n  ROUND(SYSDATE, 'YYYY') AS rounded_year\nFROM DUAL"
+  },
+  {
+    "name": "Truncate to Quarter (TRUNC Q)",
+    "code": "-- Get the first day of the current quarter\nSELECT\n  TRUNC(SYSDATE, 'Q') AS first_day_of_quarter\nFROM DUAL"
+  },
+  {
+    "name": "Subquery in SELECT (Scalar Subquery)",
+    "code": "-- Fetch a single value from another table directly in the SELECT clause\nSELECT\n  paam.person_id,\n  paam.assignment_id,\n  (\n    SELECT email_address \n    FROM per_email_addresses e \n    WHERE e.person_id = paam.person_id AND e.email_type = 'W1' \n    AND ROWNUM = 1\n  ) AS work_email\nFROM\n  per_all_assignments_m paam"
+  },
+  {
+    "name": "Wildcards and Escaping (LIKE)",
+    "code": "-- Search for strings containing special characters like underscores\nSELECT\n  job_code,\n  name\nFROM\n  per_jobs_f_tl\nWHERE\n  -- Use ESCAPE to search for a literal underscore instead of a wildcard\n  job_code LIKE '%\\_DIR%' ESCAPE '\\'"
+  },
+  {
+    "name": "Grand Totals with ROLLUP",
+    "code": "-- Add a grand total row to your aggregate query\nSELECT\n  assignment_status_type,\n  COUNT(person_id) AS headcount\nFROM\n  per_all_assignments_m\nGROUP BY\n  ROLLUP(assignment_status_type)"
+  },
+  {
+    "name": "Fetch Assigned Payroll",
+    "code": "-- Get the payroll name assigned to a worker\nSELECT\n  pau.assignment_id,\n  pp_tl.payroll_name\nFROM\n  pay_assigned_payrolls_dn pau\n  INNER JOIN pay_all_payrolls_f_tl pp_tl ON pau.payroll_id = pp_tl.payroll_id\nWHERE\n  pp_tl.language = 'US'\n  AND TRUNC(SYSDATE) BETWEEN pau.start_date AND pau.end_date"
+  },
+  {
+    "name": "Fetch Element Entry Value",
+    "code": "-- Pull specific payroll element values (e.g., allowances, deductions)\nSELECT\n  peev.element_entry_id,\n  piv_tl.name AS input_value_name,\n  peev.screen_entry_value\nFROM\n  pay_element_entry_values_f peev\n  INNER JOIN pay_input_values_f_tl piv_tl ON peev.input_value_id = piv_tl.input_value_id\nWHERE\n  piv_tl.language = 'US'\n  AND TRUNC(SYSDATE) BETWEEN peev.effective_start_date AND peev.effective_end_date"
+  },
+  {
+    "name": "Fetch Citizenship Status",
+    "code": "-- Retrieve citizenship details for an employee\nSELECT\n  person_id,\n  citizenship_status,\n  date_from,\n  date_to\nFROM\n  per_citizenships\nWHERE\n  -- Filter for actively held citizenships\n  TRUNC(SYSDATE) BETWEEN date_from AND NVL(date_to, TO_DATE('4712-12-31', 'YYYY-MM-DD'))"
+  },
+  {
+    "name": "Fetch Ethnicity/Race",
+    "code": "-- Retrieve ethnicity details stored in the person profile\nSELECT\n  pe.person_id,\n  pe.ethnicity,\n  pe.primary_flag\nFROM\n  per_ethnicities pe\nWHERE\n  pe.primary_flag = 'Y'"
+  },
+  {
+    "name": "Fetch Veteran Status",
+    "code": "-- Retrieve US specific veteran status codes\nSELECT\n  person_id,\n  veteran_status\nFROM\n  per_people_legislative_v\nWHERE\n  legislation_code = 'US'"
+  },
+  {
+    "name": "Fetch Passport Details",
+    "code": "-- Retrieve active passport information\nSELECT\n  person_id,\n  passport_number,\n  issuing_country,\n  issue_date,\n  expiration_date\nFROM\n  per_passports\nWHERE\n  TRUNC(SYSDATE) <= expiration_date"
+  },
+  {
+    "name": "Fetch Visa Details",
+    "code": "-- Retrieve active Visa or Work Permit information\nSELECT\n  person_id,\n  visa_permit_type,\n  visa_permit_number,\n  issue_date,\n  expiration_date\nFROM\n  per_visas_permits_f\nWHERE\n  TRUNC(SYSDATE) BETWEEN effective_start_date AND effective_end_date"
+  },
+  {
+    "name": "Fetch Payment Methods",
+    "code": "-- Get personal payment methods (e.g., Direct Deposit, Check)\nSELECT\n  ppm.assignment_id,\n  ppm.percentage,\n  ppm.amount,\n  opm_tl.org_payment_method_name\nFROM\n  pay_person_pay_methods_f ppm\n  INNER JOIN pay_org_pay_methods_f_tl opm_tl ON ppm.org_payment_method_id = opm_tl.org_payment_method_id\nWHERE\n  opm_tl.language = 'US'\n  AND TRUNC(SYSDATE) BETWEEN ppm.effective_start_date AND ppm.effective_end_date"
+  },
+  {
+    "name": "Fetch Assignment DFF",
+    "code": "-- Retrieve Descriptive Flexfields (DFF) attached to an assignment\nSELECT\n  paam.assignment_id,\n  paam.ass_attribute1 AS custom_field_1,\n  paam.ass_attribute2 AS custom_field_2\nFROM\n  per_all_assignments_m paam\nWHERE\n  TRUNC(SYSDATE) BETWEEN paam.effective_start_date AND paam.effective_end_date"
+  },
+  {
+    "name": "Fetch Person EFF",
+    "code": "-- Joining to Extensible Flexfields (EFF) tables (Example for PER_PERSON_EIT_EFF)\nSELECT\n  papf.person_id,\n  eff.pei_information1 AS extra_info_1\nFROM\n  per_all_people_f papf\n  LEFT JOIN per_person_eit_eff eff ON papf.person_id = eff.person_id\nWHERE\n  TRUNC(SYSDATE) BETWEEN papf.effective_start_date AND papf.effective_end_date"
+  },
+  {
+    "name": "Date Difference in Days",
+    "code": "-- Calculate exact number of days between two dates\nSELECT\n  person_id,\n  actual_termination_date,\n  date_start,\n  -- Subtracting dates in Oracle yields the difference in days\n  (actual_termination_date - date_start) AS tenure_in_days\nFROM\n  per_periods_of_service\nWHERE actual_termination_date IS NOT NULL"
+  },
+  {
+    "name": "Remove Letters from String (TRANSLATE)",
+    "code": "-- Keep only numbers by translating out all alphabet characters\nSELECT\n  attribute1 AS mixed_string,\n  -- TRANSLATE replaces characters one-to-one. Here we replace letters with nothing.\n  TRANSLATE(UPPER(attribute1), '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', '0123456789') AS numbers_only\nFROM\n  some_custom_table"
+  },
+  {
+    "name": "Check for NULL (IS NULL / IS NOT NULL)",
+    "code": "-- Standard check to filter out or find missing data\nSELECT\n  person_id,\n  email_address\nFROM\n  per_email_addresses\nWHERE\n  email_address IS NOT NULL\n  AND person_id IS NULL"
+  },
+  {
+    "name": "Fetch Cost Center (GL Default)",
+    "code": "-- Retrieve the default Cost Center mapped to an assignment\nSELECT\n  pac.assignment_id,\n  gcc.segment3 AS cost_center -- Adjust segment number based on your Chart of Accounts\nFROM\n  pay_cost_allocations_f pac\n  INNER JOIN gl_code_combinations gcc ON pac.cost_allocation_keyflex_id = gcc.code_combination_id\nWHERE\n  TRUNC(SYSDATE) BETWEEN pac.effective_start_date AND pac.effective_end_date"
+  },
+  {
+    "name": "Fetch Worker Type (Employee vs Contingent)",
+    "code": "-- Identify if a worker is an Employee (E), Contingent Worker (C), or Non-Worker (N)\nSELECT\n  person_id,\n  worker_type\nFROM\n  per_periods_of_service\nWHERE\n  -- Make sure to check the active period of service\n  actual_termination_date IS NULL"
+  },
+  {
+    "name": "Extract JSON Value (Oracle 12c+)",
+    "code": "-- Parse JSON data stored in a CLOB or VARCHAR2 column\nSELECT\n  -- Assuming 'custom_json_data' is a column containing {\"department\":\"Sales\", \"id\":123}\n  JSON_VALUE(custom_json_data, '$.department') AS extracted_dept\nFROM\n  some_custom_integration_table"
+  },
+  {
+    "name": "Fetch Last Update User",
+    "code": "-- See who last updated the employee profile record\nSELECT\n  person_id,\n  last_updated_by,\n  last_update_date\nFROM\n  per_all_people_f\nWHERE\n  TRUNC(SYSDATE) BETWEEN effective_start_date AND effective_end_date"
+  }
+]
